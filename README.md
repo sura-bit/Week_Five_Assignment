@@ -1,35 +1,33 @@
-# Room API
+## Database
 
-This API provides a simple REST interface for managing rooms, including creating, viewing, updating, filtering, sorting, and deleting rooms.
+This project uses an H2 in-memory database with two tables: `room` and `reservation`.
 
-## Endpoints
+### Tables
 
-| Method | Path              | Status          | Description                                                                  |
-| ------ | ----------------- | --------------- | ---------------------------------------------------------------------------- |
-| GET    | `/api/rooms`      | 200             | Get all rooms with optional `minCapacity`, `keyword`, and `sort` parameters  |
-| GET    | `/api/rooms/{id}` | 200 / 404       | Get a room by ID                                                             |
-| POST   | `/api/rooms`      | 201 / 400       | Create a new room and return its Location; capacity must be between 1 and 20 |
-| PUT    | `/api/rooms/{id}` | 200 / 400 / 404 | Update an existing room; capacity must be between 1 and 20                   |
-| DELETE | `/api/rooms/{id}` | 204 / 404       | Delete a room                                                                |
+| Table         | Columns                                                  |
+| ------------- | -------------------------------------------------------- |
+| `room`        | `id`, `name`, `capacity`                                 |
+| `reservation` | `id`, `room_id`, `reserved_by`, `start_time`, `end_time` |
 
-### GET /api/rooms Filters
+The `reservation.room_id` column is a foreign key referencing `room.id`. One room can have multiple reservations.
 
-The `minCapacity` and `keyword` parameters are optional and can be used separately or together.
+The `room.capacity` column has a database constraint requiring the value to be between 1 and 20.
 
-| Request                                 | Result  |
-| --------------------------------------- | ------- |
-| `/api/rooms?minCapacity=6`              | 2 rooms |
-| `/api/rooms?keyword=pod`                | 1 room  |
-| `/api/rooms?minCapacity=6&keyword=roof` | 1 room  |
-| `/api/rooms`                            | 3 rooms |
+### H2 Console
 
-The `sort` parameter can be used to sort rooms by `capacity` or `name`.
+After starting the application, open:
 
-## Capacity Rule
+`http://localhost:8080/h2-console`
 
-Room capacity must be between 1 and 20.
+Use the following connection settings:
 
-Invalid capacity values in POST and PUT requests return `400 Bad Request`.
+| Setting   | Value                |
+| --------- | -------------------- |
+| JDBC URL  | `jdbc:h2:mem:roomdb` |
+| User Name | `sa`                 |
+| Password  | *(empty)*            |
+
+The database is initialized automatically from `schema.sql` and `data.sql` when the application starts.
 
 ## How to Run
 
@@ -46,10 +44,6 @@ Invalid capacity values in POST and PUT requests return `400 Bad Request`.
 ```bat
 gradlew.bat bootRun
 ```
-
-Use `api.http` to test the endpoints at `http://localhost:8080/api/rooms`.
-
-Swagger UI is available at `http://localhost:8080/swagger-ui.html`.
 
 ## AI Use
 
